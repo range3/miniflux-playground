@@ -1,8 +1,16 @@
 services:
+  reactflux:
+    image: electh/reactflux
+    ports:
+      - 80:2000
+    depends_on:
+      - miniflux
+    restart: unless-stopped
+
   miniflux:
     image: miniflux/miniflux:latest
     ports:
-      - "80:8080"
+      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -12,6 +20,8 @@ services:
       - CREATE_ADMIN=1
       - ADMIN_USERNAME=${MINIFLUX_ADMIN_USERNAME}
       - ADMIN_PASSWORD=${MINIFLUX_ADMIN_PASSWORD}
+    restart: unless-stopped
+
   db:
     image: postgres:15
     environment:
@@ -24,6 +34,7 @@ services:
       test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
       interval: 10s
       start_period: 30s
+    restart: unless-stopped
 
 volumes:
   miniflux-db:
